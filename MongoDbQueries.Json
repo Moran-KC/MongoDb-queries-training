@@ -1,0 +1,44 @@
+1.	db.mongolit.find({$where:"this.volumeInfo.authors.length>2","volumeInfo.categories":{$in:["Computers"]}}).pretty()
+
+2.	db.mongolit.find({"volumeInfo.pageCount":{$lt:560}},{"accessInfo.pdf.isAvailable":{$not:true}},{"accessInfo.epub.isAvailable":{$not:true}})
+
+
+3.	db.mongolit.updateMany({"volumeInfo.pageCount":{$gt:200},"volumeInfo.ratingsCount":{$eq:1}},{$set:{"accessInfo.viewAbility":"Not Available"}})
+
+4.	db.mongolit.updateMany({"volumeInfo.publisher":"O'ReillyMedia,Inc.\"","maturutyRating":{$ne:"MATURE"}},{$set: {"readinModes.icon":true}})
+
+
+5.	db. mongolit.updateMany({"volumeInfo.averageRating":5},{$push:{"authors": "John Doe”}})
+
+6.	db.mongolit.deleteMany({$or:[{"saleInfo.saleability":"NOT_FOR_SALE"},{"embeddable":false}]})
+
+7.	db. mongolit.updateMany({"volumeInfo.subtitle":""},{$set:{"categories":"databases"}})
+
+חלק 2 : 
+1.	create constraint on (p:Person) assert exists (p.UUID)
+       create constraint on (p:Person) assert p.id is unique 
+     create constraint on (p:Person) assert p.fullname is unique
+2.	 create (a:Person{fullname: 'Alexa Levi',age:30,salaries:[10000,25000],titles:['Developer','Quantitative Researcher'],friends:['Mark Dolev'],numOfChildren:2,children:['Rami Levi','Georgia Bershneg'],UUID:"1111"})
+       create (b:Person{fullname: 'Mark Dolev',id:"3OF2LDRT55", friends:[Alexa      Levi],age:60,UUID:"2222"})
+
+3.	match (a:Person{fullname:"Alexa Levi"})
+       match (b:Person{fullname:"Mark Dolev"})
+       MERGE (a)-[:FRIENDS]->(b)
+       MERGE (b)-[:FRIENDS]->(a)
+
+4.	MATCH (p:Person)
+       WHERE reduce(sum=0, s in p.salaries|sum+s)<40000 set 
+       p.salaries=p.salaries+10000
+
+5.	MATCH (a:Person), (b:Person) WHERE a.numOfChildren>1 and b.numOfChildren>1 and not
+        a=b
+       MERGE (a)-[:FRIENDS]->(b)
+      ON CREATE set a.friends=a.friends+b.fullname WITH a
+      UNWIND a.children as children
+      RETURN children
+
+6.	MATCH n=(a:Person) WHERE a.numOfChildren>1 UNWIND [n in nodes(n)] as nodes
+       RETURN sum(nodes.numOfChildren)
+
+7.	WITH [40, 60, 30] as ages UNWIND ages as age MATCH (p:Person{age:age}) set p+={even:true}
+RETURN p ORDER by p.age
